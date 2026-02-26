@@ -11,4 +11,14 @@ is removed from a tunnel for each time period.
 ![img.png](img.png)
 
 ## Installation
->git clone 
+> git clone https://github.com/dbrown92700/SDWAN_SLA \
+> python -m venv venv \
+> pip install -r requirements
+
+Create a .env file using .env_sample.  Edit variables in .env for your environment.
+
+> cp .env_sample .env
+
+## Execute
+
+> python sla_report.py
