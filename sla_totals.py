@@ -34,11 +34,12 @@ for num, e in enumerate(edges):
         total_events += events
     e['total_events'] = total_events
     print(num, len(edges), e)
-sorted_edges = sorted(edges, key=lambda e: e['total_events'])
+sorted_edges = sorted(edges, key=lambda e: e['total_events'], reverse=True)
 for e in range(-1, -11, -1):
     print(f'{sorted_edges[e]["hostname"]} {sorted_edges[e]["total_events"]}')
     print(sorted_edges[e])
-with open(f'totals.csv', 'w', newline='') as csvfile:
+t = datetime.now()
+with open(f'SLA_Totals-{t.year}{t.month}{t.day}.csv', 'w', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=list(sorted_edges[0].keys()))
     writer.writeheader()
     writer.writerows(sorted_edges)
