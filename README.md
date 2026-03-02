@@ -10,13 +10,16 @@ is removed from a tunnel for each time period.
 
 ![img.png](img.png)
 
-The script will also generate a CSV. Here's an example of using Excel and applying conditional formatting with the default
-"high is bad" format and filtering down to compare Queue0 and Queue2 on 3 colors on a specific tunnel
-with a report run across 3 days (72 hours).
+The script will also generate a CSV. Here's an example of using Excel: 
+- applying conditional formatting with the default "high is bad" format
+- filtering down to compare Queue0 and Queue2
+- filtering to a specific tunnel
+- showing all 3 colors 
+- with a report run across 3 days (72 hours)
 
 ![img_1.png](img_1.png)
 
-Here's another report on the same date with 15 minute intervals on the middle day shown above.
+Here's another report from the same system with 15 minute intervals on the 8-hour "issue timeframe" shown above.
 
 ![img_3.png](img_3.png)
 

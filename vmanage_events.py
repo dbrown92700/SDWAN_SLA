@@ -86,14 +86,6 @@ def get_tunnels(vmanage: VmanageRestApi, site='481157000'):
         colors[t['local_color']][t['remote_system_ip']] = {}
     return colors
 
-'''
-tunnels
-dict_keys(['local_system_ip', 'local_color', 'remote_system_ip', 'remote_color', 'name', 'health_score', 'health', 'summary', 'history'])
-{'entry_time': 1771950600000, 'health_score': 0.0, 'health': 'poor', 'data': {'latency': 78.47619047619048, 'jitter': 0.2761904761904762, 'loss_percentage': 6.53872380952381, 'vqoe_score': 4.9904761904761905, 'state': 'Up', 'tx_octets': 1118574.0, 'rx_octets': 5918351.0}}
-{'entry_time': 1771952400000, 'health_score': 5.0, 'health': 'fair', 'data': {'latency': 77.95238095238095, 'jitter': 0.7619047619047619, 'loss_percentage': 1.3913619047619046, 'vqoe_score': 6.942857142857143, 'state': 'Up', 'tx_octets': 807880.0, 'rx_octets': 13116356}}
-every 30 minutes for 12 hours
-'''
-
 def get_queues(vmanage: VmanageRestApi, sys_ip="10.33.205.24"):
     sla = vmanage.get_request(f'/device/app-route/sla-class?deviceId={sys_ip}')['data']
     queues = []
