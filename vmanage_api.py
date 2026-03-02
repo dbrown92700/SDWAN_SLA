@@ -28,9 +28,9 @@ Updated for vManage 19.2 to include Cross Site Scripting Token
 Example: python rest_api_lib.py vmanage_hostname username password
 
 PARAMETERS:
-	vmanage_hostname : Ip address of the vmanage or the dns name of the vmanage
-	username : Username to login the vmanage
-	password : Password to login the vmanage
+    vmanage_hostname : Ip address of the vmanage or the dns name of the vmanage
+    username : Username to login the vmanage
+    password : Password to login the vmanage
 
 Note: All the three arguments are mandatory
 """
@@ -38,68 +38,73 @@ Note: All the three arguments are mandatory
 
 class VmanageRestApi:
 
-	def __init__(self, vmanage_ip, username, password):
-		self.vmanage_ip = vmanage_ip
-		self.session = {}
-		# If the vmanage has a certificate signed by a trusted authority change verify to True
-		self.verify = False
-		self.login(self.vmanage_ip, username, password)
-		self.token = None
-		self.token = self.get_request('/client/token')
+    def __init__(self, vmanage_ip, username, password, verify=False):
+        self.vmanage_ip = vmanage_ip
+        self.session = None
+        # If the vmanage has a certificate signed by a trusted authority change verify to True
+        self.verify = verify
+        self.token = None
+        self.cookie = None
+        self.login(self.vmanage_ip, username, password)
 
-	def login(self, vmanage_ip, username, password):
 
-		base_url_str = f'https://{vmanage_ip}/'
-		login_action = '/j_security_check'
-		login_data = {'j_username': username, 'j_password': password}
-		login_url = base_url_str + login_action
-		sess = requests.session()
-		sess.post(url=login_url, data=login_data, verify=self.verify)
-		self.session[vmanage_ip] = sess
+    def login(self, vmanage_ip, username, password):
 
-	def get_request(self, mount_point, headers={'Content-Type': 'application/json'}, params=''):
+        base_url_str = f'https://{vmanage_ip}/'
+        login_action = '/j_security_check'
+        login_data = {'j_username': username, 'j_password': password}
+        login_url = base_url_str + login_action
+        self.session = requests.session()
+        response = self.session.post(url=login_url, data=login_data, verify=self.verify)
+        self.cookie = response.cookies
+        self.token = self.get_request('/client/token')
 
-		url = f"https://{self.vmanage_ip}/dataservice{mount_point}"
-		if self.token:
-			headers['X-XSRF-TOKEN'] = self.token
-		response = self.session[self.vmanage_ip].get(url, headers=headers, params=params, verify=self.verify)
-		data = response.content.decode('utf-8')
-		try:
-			data = json.loads(data)
-		except:
-			pass
-		return data
+    def get_request(self, mount_point, headers={'Content-Type': 'application/json'}, params=''):
 
-	def post_request(self, mount_point, payload: dict, headers={'Content-Type': 'application/json'}):
+        url = f"https://{self.vmanage_ip}/dataservice{mount_point}"
+        headers['X-XSRF-TOKEN'] = self.token
+        headers['Cookie'] = f'JSESSIONID={self.cookie["JSESSIONID"]}'
+        response = self.session.get(url, headers=headers, params=params, verify=self.verify)
+        data = response.content.decode('utf-8')
+        try:
+            data = json.loads(data)
+        except:
+            pass
+        return data
 
-		url = f"https://{self.vmanage_ip}/dataservice{mount_point}"
-		payload = json.dumps(payload)
-		headers['X-XSRF-TOKEN'] = self.token
-		response = self.session[self.vmanage_ip].post(url=url, data=payload, headers=headers, verify=self.verify)
-		data = json.loads(response.content)
-		return data
+    def post_request(self, mount_point, payload: dict, headers={'Content-Type': 'application/json'}):
 
-	def put_request(self, mount_point, payload, headers={'Content-Type': 'application/json'}):
+        url = f"https://{self.vmanage_ip}/dataservice{mount_point}"
+        payload = json.dumps(payload)
+        headers['X-XSRF-TOKEN'] = self.token
+        headers['Cookie'] = f'JSESSIONID={self.cookie["JSESSIONID"]}'
+        response = self.session.post(url=url, data=payload, headers=headers, verify=self.verify)
+        data = json.loads(response.content)
+        return data
 
-		url = f"https://{self.vmanage_ip}/dataservice{mount_point}"
-		payload = json.dumps(payload)
-		headers['X-XSRF-TOKEN'] = self.token
-		response = self.session[self.vmanage_ip].put(url=url, data=payload, headers=headers, verify=self.verify)
-		return response
+    def put_request(self, mount_point, payload, headers={'Content-Type': 'application/json'}):
 
-	def delete_request(self, mount_point):
+        url = f"https://{self.vmanage_ip}/dataservice{mount_point}"
+        payload = json.dumps(payload)
+        headers['X-XSRF-TOKEN'] = self.token
+        headers['Cookie'] = f'JSESSIONID={self.cookie["JSESSIONID"]}'
+        response = self.session.put(url=url, data=payload, headers=headers, verify=self.verify)
+        return response
 
-		url = f"https://{self.vmanage_ip}/dataservice{mount_point}"
-		headers = {'Content-Type': 'application/json'}
-		headers['X-XSRF-TOKEN'] = self.token
-		response = self.session[self.vmanage_ip].delete(url=url, headers=headers, verify=self.verify)
-		data = json.loads(response.content)
-		return data
+    def delete_request(self, mount_point):
 
-	def logout(self):
+        url = f"https://{self.vmanage_ip}/dataservice{mount_point}"
+        headers = {'Content-Type': 'application/json'}
+        headers['X-XSRF-TOKEN'] = self.token
+        headers['Cookie'] = f'JSESSIONID={self.cookie["JSESSIONID"]}'
+        response = self.session.delete(url=url, headers=headers, verify=self.verify)
+        data = json.loads(response.content)
+        return data
 
-		url = f"https://{self.vmanage_ip}/logout"
-		headers = {'Content-Type': 'application/json'}
-		headers['X-XSRF-TOKEN'] = self.token
-		response = self.session[self.vmanage_ip].get(url, headers=headers, verify=self.verify)
-		return response
+    def logout(self):
+        url = f"https://{self.vmanage_ip}/logout?nocache"
+        headers = {'Content-Type': 'x-www-form-urlencoded'}
+        headers['X-XSRF-TOKEN'] = self.token
+        headers['Cookie'] = f'JSESSIONID={self.cookie["JSESSIONID"]}'
+        response = self.session.post(url, headers=headers, verify=self.verify)
+        return response

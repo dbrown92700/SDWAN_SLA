@@ -1,11 +1,12 @@
 import json
 import os
 from datetime import datetime
+from enum import verify
+
 from vmanage_api import VmanageRestApi
 from dotenv import load_dotenv
 
 def vmanage_login() -> VmanageRestApi:
-    load_dotenv()
     load_dotenv()
     username = os.getenv("VMANAGE_USER")
     password = os.getenv("VMANAGE_PASS")
@@ -13,6 +14,9 @@ def vmanage_login() -> VmanageRestApi:
     vmanage = VmanageRestApi(username=username, password=password, vmanage_ip=address)
 
     return vmanage
+
+def vmanage_logout(vmanage: VmanageRestApi):
+    vmanage.logout()
 
 def get_events(vmanage: VmanageRestApi, sys_ip="10.33.205.24", hours=3, last_n=True, start_time=datetime.now(),
                event_name=[], component=[]):

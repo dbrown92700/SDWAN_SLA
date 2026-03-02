@@ -23,6 +23,10 @@ Here's another report from the same system with 15 minute intervals on the 8-hou
 
 ![img_3.png](img_3.png)
 
+SLA Total report generates a report with the number of SLA events per day for the last 7 full days.
+
+![img_4.png](img_4.png)
+
 ## Installation
 > git clone https://github.com/dbrown92700/SDWAN_SLA \
 > python -m venv venv \
@@ -34,4 +38,9 @@ Create a .env file using .env_sample.  Edit variables in .env for your environme
 
 ## Execute
 
+Site SLA Report:
+
 > python sla_report.py
+ 
+SLA Totals Week Report:
+> python sla_totals.py
