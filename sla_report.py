@@ -158,23 +158,27 @@ if __name__ == '__main__':
             last_n = True
         if last_N == 'n':
             last_n = False
-            entered_time = input(f'Enter start time and date using 24-hour time in the format [{entered_time}]: ') or entered_time
+            entered_time = (input(f'Enter start time and date using 24-hour time in the format [{entered_time}]: ') or
+                            entered_time)
             start_time = datetime.timestamp(datetime.strptime(entered_time, '%H:%M %m/%d/%Y'))
         start_time = datetime.timestamp(datetime.strptime(entered_time, '%H:%M %m/%d/%Y'))
-        period_choice = input(f'Enter period choice\n1: Hour\n2: 30 minutes\n3: 15 minutes\n[{period_choice}]? ') or period_choice
+        period_choice = (input(f'Enter period choice\n1: Hour\n2: 30 minutes\n3: 15 minutes\n[{period_choice}]? ') or
+                         period_choice)
         if (last_n):
             tm = datetime.fromtimestamp(datetime.now().timestamp() - time_range * 3600)
         else:
             tm = datetime.strptime(entered_time, '%H:%M %m/%d/%Y')
         file_time = f'{tm.year}{tm.month:02}{tm.day:02}{tm.hour:02}{tm.minute:02}'
-        csv_file = input(f'Enter csv file if desired [{sys_ip}-{file_time}-{time_range}hr.csv]: ') or f'{sys_ip}-{file_time}-{time_range}hr.csv'
+        csv_file = (input(f'Enter csv file if desired [{sys_ip}-{file_time}-{time_range}hr.csv]: ') or
+                    f'{sys_ip}-{file_time}-{time_range}hr.csv')
         period = {'1': 3600, '2': 1800, '3': 900}[period_choice]
 
         device = vmanage.get_request(f'/device?deviceId={sys_ip}')
         site_id = device['data'][0]['site-id']
 
         # Get Events
-        sla_events = v.get_events(vmanage, last_n=last_n, hours=time_range, start_time=start_time + gmt_adjust, event_name='sla-change')
+        sla_events = v.get_events(vmanage, sys_ip=sys_ip, last_n=last_n, hours=time_range,
+                                  start_time=start_time + gmt_adjust, event_name='sla-change')
         if last_n:
             start_time = int(sla_events['header']['generatedOn']/1000) - time_range * 3600
         sla_events = sla_events['data']
