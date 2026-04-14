@@ -65,7 +65,19 @@ def calculate_downtime(start_time, time_range, period, sla_events, tunnels, queu
         old_q = e['old-sla-classes'].split(', ')
         new_q = e['sla-classes'].split(', ')
 
-        event_tunnel = tunnels[e['local-color']][e['remote-system-ip']]
+        try:
+            event_tunnel = tunnels[e['local-color']][e['remote-system-ip']]
+        # Handle the situation where color is not up at the site at the time when the report is run
+        except KeyError:
+            try:
+                tunnels[e['local-color']][e['remote-system-ip']] = {}
+            except KeyError:
+                tunnels[e['local-color']] = {}
+                tunnels[e['local-color']][e['remote-system-ip']] = []
+            q = [0, {q: [0 for x in range(int(time_range * 3600 / period))] for q in queues}]
+            tunnels[e['local-color']][e['remote-system-ip']] = q
+            event_tunnel = tunnels[e['local-color']][e['remote-system-ip']]
+
 
         event_time = int(event['entry_time'] / 1000) - start_time
         if event_time == time_range * 3600:
@@ -106,11 +118,6 @@ def calculate_downtime(start_time, time_range, period, sla_events, tunnels, queu
                     for x in range(int(time_range * 3600 / period)):
                         event_tunnel[1][queue][x] += time_dist[x]
             event_tunnel[2] = new_q
-
-        # if e['local-color'] == 'private2' and e['remote-system-ip'] == '10.46.18.56':
-        #     print(datetime.fromtimestamp(int(event['statcycletime'] / 1000)), event_time - tunnel_last_event_time)
-        #     print(time_dist)
-        #     print(f'{e['old-sla-classes']}\n\n     {event_tunnel}\n')
 
     # Fill in remaining time for Queues in SLA on last event
     for c in tunnels:
@@ -195,6 +202,4 @@ if __name__ == '__main__':
         tunnels = calculate_downtime(start_time, time_range, period, sla_events, tunnels, queues)
 
         generate_output(tunnels, csv_file=csv_file)
-
-        # print_tunnel_events(color = 'private2', rip='10.46.18.56')
 
