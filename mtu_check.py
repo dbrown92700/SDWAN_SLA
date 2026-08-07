@@ -10,6 +10,8 @@ headend_model = 'vedge-C8500-12X4QC'
 expected_mtu = 1438
 
 vm = v.vmanage_login()
+
+# Get a list of all edges and headends
 devices = vm.get_request('/device')['data']
 edges = {}
 headends = []
@@ -21,6 +23,8 @@ for num, headend in enumerate(headends):
     print(f"{num}: {headend['host-name']}")
 headend_choice = int(input('Choose a headend: '))
 device_id = headends[headend_choice]['system-ip']
+
+# Pull BFD list for the selected Headend and compile a list of 'tunnels' with less than expected MTU
 bfds = vm.get_request(f'/device/tunnel/statistics?deviceId={device_id}')['data']
 tunnels = []
 for headend_bfd in bfds:
@@ -31,6 +35,8 @@ for headend_bfd in bfds:
         tunnels.append(tunnel_stats)
 print(f"Found {len(tunnels)} tunnels")
 tunnels = sorted(tunnels, key=lambda tunnel: tunnel['system-ip'])
+
+# Print a list of the found tunnels and query branch for branch side MTU
 for headend_bfd in tunnels:
     bfds = vm.get_request(f"/device/tunnel/statistics?deviceId={headend_bfd['system-ip']}")['data']
     for branch_bfd in bfds:
