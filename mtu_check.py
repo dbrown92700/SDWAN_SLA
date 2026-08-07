@@ -1,5 +1,13 @@
 
+# Does a Tunnel MTU check for reduced tunnels
+# Lists out headends by looking for model specified below as 'headend_model'
+# Once a user selects a headend, it lists all tunnels less than 'expected_mtu'
+# along with the corresponding MTU from the branch side.
+
 import vmanage_events as v
+
+headend_model = 'vedge-C8500-12X4QC'
+expected_mtu = 1438
 
 vm = v.vmanage_login()
 devices = vm.get_request('/device')['data']
@@ -7,7 +15,7 @@ edges = {}
 headends = []
 for device in devices:
     edges[device['deviceId']] = device['host-name']
-    if device['device-model'] == 'vedge-C8500-12X4QC':
+    if device['device-model'] == headend_model:
         headends.append({'system-ip': device['deviceId'], 'host-name': device['host-name']})
 for num, headend in enumerate(headends):
     print(f"{num}: {headend['host-name']}")
@@ -16,7 +24,7 @@ device_id = headends[headend_choice]['system-ip']
 bfds = vm.get_request(f'/device/tunnel/statistics?deviceId={device_id}')['data']
 tunnels = []
 for headend_bfd in bfds:
-    if headend_bfd['tunnel-mtu'] < 1438:
+    if headend_bfd['tunnel-mtu'] < expected_mtu:
         tunnel_stats = {}
         for stat in ['vdevice-name', 'system-ip', 'local-color', 'remote-color', 'tunnel-mtu']:
             tunnel_stats[stat] = headend_bfd[stat]
